@@ -49,6 +49,10 @@ function install_vnet(){
     rm -rf vnet.tar.gz vnet
 
     #下载vnet最新版本压缩包
+    wget https://raw.githubusercontent.com/Jinxs9/SSRSpeed/master/updatevnet.sh
+    chmod +x updatevnet.sh
+
+    #下载vnet最新版本压缩包
     wget https://github.com/928net/download/raw/master/vnet.tar.gz -O vnet.tar.gz
     mkdir -p /root/vnet
     tar -xzvf vnet.tar.gz -C vnet
@@ -82,7 +86,9 @@ EOF
 
     se=$(which service)
     sed -i '/vnet restart/d'  /etc/crontab
-	echo "15 */6 * * * ${se} vnet restart" >> /etc/crontab
+    sed -i '/updatevnet/d'  /etc/crontab
+	echo "15 */6 * * * root ${se} vnet restart" >> /etc/crontab
+	echo "0 6 * * * root /root/updatevnet.sh" >> /etc/crontab
     echo "已设置自动重启"
 }
 
