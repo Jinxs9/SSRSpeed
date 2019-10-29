@@ -71,7 +71,7 @@ EOF
     ln -P vnet.service /etc/systemd/system/
     systemctl daemon-reload
     systemctl enable vnet
-    systemctl start vnet
+    systemctl restart vnet
     echo "服务已安装"
 
     # 关闭防火墙
