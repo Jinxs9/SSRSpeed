@@ -25,13 +25,13 @@ function check_system(){
     else
         release='Unknow'
     fi
-	bit=`uname -m`
-	if ! [[ ${release} == "Unknow" ]] && [[ ${bit} == "x86_64" ]]; then
-	echo -e "当前系统为[${release} ${bit}],\033[32m  可以搭建\033[0m"
-	else
-	echo -e "\033[31m 脚本停止运行(●°u°●)​ 」，请更换centos7.x 64位系统运行此脚本 \033[0m"
-	exit 0;
-	fi
+    bit=`uname -m`
+    if ! [[ ${release} == "Unknow" ]] && [[ ${bit} == "x86_64" ]]; then
+    echo -e "当前系统为[${release} ${bit}],\033[32m  可以搭建\033[0m"
+    else
+    echo -e "\033[31m 脚本停止运行(●°u°●)​ 」，请更换centos7.x 64位系统运行此脚本 \033[0m"
+    exit 0;
+    fi
 }
 
 function install_vnet(){
@@ -41,15 +41,12 @@ function install_vnet(){
         ${PM} install wget -y
     fi
 
-    read -p " 节点id: " -i -e node_id
-    read -p " 面板通讯密钥: " -i -e api_key
-
     cd /root/
     #清理上次下载
     rm -rf vnet.tar.gz vnet
 
     #下载vnet最新版本压缩包
-    wget https://raw.githubusercontent.com/Jinxs9/SSRSpeed/master/updatevnet.sh
+    wget https://raw.githubusercontent.com/Jinxs9/SSRSpeed/master/updatevnet.sh -O updatevnet.sh
     chmod +x updatevnet.sh
 
     #下载vnet最新版本压缩包
@@ -63,8 +60,8 @@ function install_vnet(){
     # 生成配置文件
     cat > config.json << EOF
 {
-    "node_id":$node_id,
-    "key": "$api_key",
+    "node_id":"$1",
+    "key": "$2",
     "api_host": "https://zind.cloud"
 }
 EOF
@@ -87,10 +84,10 @@ EOF
     se=$(which service)
     sed -i '/vnet restart/d'  /etc/crontab
     sed -i '/updatevnet/d'  /etc/crontab
-	echo "15 */6 * * * root ${se} vnet restart" >> /etc/crontab
-	echo "0 6 * * * root /root/updatevnet.sh" >> /etc/crontab
+    echo "15 */6 * * * root ${se} vnet restart" >> /etc/crontab
+    echo "0 6 * * * root /root/updatevnet.sh" >> /etc/crontab
     echo "已设置自动重启"
 }
 
 check_system
-install_vnet
+install_vnet $1 $2
