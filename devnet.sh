@@ -42,6 +42,8 @@ function install_vnet(){
 
     cd /root/
 
+    docker pull net928/vnet
+    docker rm -f jvn$1
     docker run -d --name=jvn$1 -e node_id=$1 -e api_host=https://zind.cloud -e key=$2 --network=host --log-opt max-size=15m --log-opt max-file=3 --restart=always net928/vnet
     
     sed -i '/vnet restart/d'  /etc/crontab
