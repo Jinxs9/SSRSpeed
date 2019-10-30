@@ -48,8 +48,8 @@ function install_vnet(){
     sed -i '/docker pull/d'  /etc/crontab
     sed -i '/docker restart/d'  /etc/crontab
     echo "15 */6 * * * root /etc/init.d/docker restart" >> /etc/crontab
-    echo "45 5 * * * root /etc/init.d/docker pull net928/vnet" >> /etc/crontab
-    echo "50 5 * * * root /etc/init.d/docker rm -f jvn$1 && /etc/init.d/docker run -d --name=jvn$1 -e node_id=$1 -e api_host=https://zind.cloud -e key=$2 --network=host --log-opt max-size=15m --log-opt max-file=3 --restart=always net928/vnet" >> /etc/crontab
+    echo "45 5 * * * root docker pull net928/vnet" >> /etc/crontab
+    echo "50 5 * * * root docker rm -f jvn$1 && docker run -d --name=jvn$1 -e node_id=$1 -e api_host=https://zind.cloud -e key=$2 --network=host --log-opt max-size=15m --log-opt max-file=3 --restart=always net928/vnet" >> /etc/crontab
     echo "已设置定时重启"
 
     # 关闭防火墙
