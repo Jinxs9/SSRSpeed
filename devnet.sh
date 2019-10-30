@@ -35,44 +35,22 @@ function check_system(){
 }
 
 function install_vnet(){
-    # 检测依赖
-    if ! [ -x "$(command -v wget)" ]; then
-        echo "缺少wget,自动安装"
-        ${PM} install wget -y
+    if ! [ -x "$(command -v docker)" ]; then
+        echo "缺少docker,自动安装"
+        curl -fsSL get.docker.com | sh
     fi
 
     cd /root/
-    #清理上次下载
-    rm -rf vnet.tar.gz vnet
 
-    #下载vnet最新版本压缩包
-    wget https://raw.githubusercontent.com/Jinxs9/SSRSpeed/master/updatevnet.sh -O updatevnet.sh
-    chmod +x updatevnet.sh
-
-    #下载vnet最新版本压缩包
-    wget https://github.com/928net/download/raw/master/vnet.tar.gz -O vnet.tar.gz
-    mkdir -p /root/vnet
-    tar -xzvf vnet.tar.gz -C vnet
-
-    cd /root/vnet
-    chmod +x vnet
-
-    # 生成配置文件
-    cat > config.json << EOF
-{
-    "node_id":"$1",
-    "key": "$2",
-    "api_host": "https://zind.cloud"
-}
-EOF
-    echo "配置已生成"
-
-    # 服务安装
-    ln -P vnet.service /etc/systemd/system/
-    systemctl daemon-reload
-    systemctl enable vnet
-    systemctl restart vnet
-    echo "服务已安装"
+    docker run -d --name=jvn$1 -e node_id=$1 -e api_host=https://zind.cloud -e key=$2 --network=host --log-opt max-size=15m --log-opt max-file=3 --restart=always net928/vnet
+    
+    sed -i '/vnet restart/d'  /etc/crontab
+    sed -i '/docker pull/d'  /etc/crontab
+    sed -i '/docker restart/d'  /etc/crontab
+    echo "15 */6 * * * root /etc/init.d/docker restart" >> /etc/crontab
+    echo "45 5 * * * root /etc/init.d/docker pull net928/vnet" >> /etc/crontab
+    echo "50 5 * * * root /etc/init.d/docker rm -f jvn$1 && /etc/init.d/docker run -d --name=jvn$1 -e node_id=$1 -e api_host=https://zind.cloud -e key=$2 --network=host --log-opt max-size=15m --log-opt max-file=3 --restart=always net928/vnet" >> /etc/crontab
+    echo "已设置定时重启"
 
     # 关闭防火墙
     if [[ ${release} == "CentOs" ]]; then
@@ -81,12 +59,6 @@ EOF
         echo "防火墙已关闭"
     fi
 
-    se=$(which service)
-    sed -i '/vnet restart/d'  /etc/crontab
-    sed -i '/updatevnet/d'  /etc/crontab
-    echo "15 */6 * * * root ${se} vnet restart" >> /etc/crontab
-    echo "0 6 * * * root /root/updatevnet.sh" >> /etc/crontab
-    echo "已设置自动重启"
 }
 
 check_system
